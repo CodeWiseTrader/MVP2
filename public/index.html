@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Voice Cards</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div class="voice-card" v-for="voice in voices" :key="voice.id">
+        <h2>{{ voice.title }}</h2>
+        <p>{{ voice.name }}</p>
+        <div class="votes">
+          <button @click="vote(voice.id, 'like')">Like</button>
+          <span>{{ voice.likes }}</span>
+          <button @click="vote(voice.id, 'dislike')">Dislike</button>
+          <span>{{ voice.dislikes }}</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
