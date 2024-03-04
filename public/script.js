@@ -1,4 +1,4 @@
-fetch("/voices")
+fetch("mvp-2-inky.vercel.app")
   .then((response) => response.json())
   .then((data) => {
     const app = new Vue({
