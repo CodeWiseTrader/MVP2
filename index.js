@@ -1,73 +1,40 @@
-// Import required modules
 const express = require("express");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+const path = require("path");
 
-// Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
-// Middleware
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Connect to MongoDB Atlas
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://dv:54u1aHFTGji2hDsx@mvp2.bdipkb5.mongodb.net/";
+let voices = [
+  { id: 1, title: "Voice #1", name: "Voice_NAME_1", likes: 0, dislikes: 0 },
+  { id: 2, title: "Voice #2", name: "Voice_NAME_2", likes: 0, dislikes: 0 },
+];
 
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true, // Ensure indexes are created for unique fields
+app.get("/voices", (req, res) => {
+  res.json(voices);
 });
 
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
-
-db.once("open", () => {
-  console.log("Connected to MongoDB Atlas");
-});
-
-// User schema and model
-const userSchema = new mongoose.Schema({
-  username: String,
-  password: String,
-});
-
-const User = mongoose.model("User", userSchema);
-
-// Routes
-app.post("/signup", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: "Username already exists" });
-    }
-    const newUser = new User({ username, password });
-    await newUser.save();
-    res.status(201).json({ message: "User created successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+app.post("/vote/:id/:type", (req, res) => {
+  const { id, type } = req.params;
+  const voice = voices.find((v) => v.id == id);
+  if (!voice) {
+    return res.status(404).json({ message: "Voice not found" });
   }
+
+  if (type === "like") {
+    voice.likes++;
+  } else if (type === "dislike") {
+    voice.dislikes++;
+  } else {
+    return res.status(400).json({ message: "Invalid vote type" });
+  }
+
+  res.status(200).json({ message: "Vote recorded successfully" });
 });
 
-// Login logic
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const user = await User.findOne({ username, password });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid username or password" });
-    }
-    res.status(200).json({ message: "Login successful" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
